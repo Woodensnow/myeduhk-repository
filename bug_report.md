@@ -123,7 +123,12 @@ ValueError: Time slot [10, 12] conflicts with booking 'B01' [9, 10]
 
 ```diff
 -            if not (end_time < b["start_time"] or start_time > b["end_time"]):
-+            if not (end_time <= b["start_time"] or start_time >= b["end_time"]):
++            if end_time <= b["start_time"]:
++                continue
++            if start_time >= b["end_time"]:
++                continue
++            # Neither separation case applies: reject the overlap.
++            raise ValueError(...)
 ```
 
 ### 5. Regression result

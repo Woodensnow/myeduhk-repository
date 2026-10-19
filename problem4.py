@@ -58,8 +58,16 @@ class MeetingRoom:
 
         # Check for time conflicts with existing bookings
         for b in self.bookings:
-            if not (end_time <= b["start_time"] or start_time >= b["end_time"]):
-                raise ValueError(f"Time slot [{start_time}, {end_time}] conflicts with booking '{b['booking_id']}' [{b['start_time']}, {b['end_time']}]")
+            # The new meeting finishes before this booking starts.
+            if end_time <= b["start_time"]:
+                continue
+
+            # The new meeting starts after this booking finishes.
+            if start_time >= b["end_time"]:
+                continue
+
+            # Neither case applies, so the meetings overlap.
+            raise ValueError(f"Time slot [{start_time}, {end_time}] conflicts with booking '{b['booking_id']}' [{b['start_time']}, {b['end_time']}]")
 
         new_booking = {
             "booking_id": booking_id,
