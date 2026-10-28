@@ -52,7 +52,11 @@ class Order:
             raise RuntimeError("Cannot modify an order that is not PENDING")
         if price <= 0:
             raise ValueError("Item price must be positive")
-        if isinstance(quantity, bool) or not isinstance(quantity, int) or quantity <= 0:
+        if isinstance(quantity, bool):
+            raise ValueError("Quantity must be a positive integer")
+        if not isinstance(quantity, int):
+            raise ValueError("Quantity must be a positive integer")
+        if quantity <= 0:
             raise ValueError("Quantity must be a positive integer")
 
         if name in self.items:
@@ -72,15 +76,18 @@ class Order:
         if name not in self.items:
             raise KeyError(f"Item '{name}' not found in order")
 
-        if quantity is not None and (
-            isinstance(quantity, bool) or not isinstance(quantity, int) or quantity <= 0
-        ):
-            raise ValueError("Quantity to remove must be a positive integer")
+        if quantity is not None:
+            if isinstance(quantity, bool):
+                raise ValueError("Quantity to remove must be a positive integer")
+            if not isinstance(quantity, int):
+                raise ValueError("Quantity to remove must be a positive integer")
+            if quantity <= 0:
+                raise ValueError("Quantity to remove must be a positive integer")
 
-        if quantity is None or quantity >= self.items[name]["quantity"]:
+        if quantity is None:
             del self.items[name]
-        elif quantity <= 0:
-            raise ValueError("Quantity to remove must be positive")
+        elif quantity >= self.items[name]["quantity"]:
+            del self.items[name]
         else:
             self.items[name]["quantity"] -= quantity
 
@@ -127,12 +134,16 @@ class Order:
         net_subtotal = max(0.0, self.subtotal - self.discount_amount)
 
         # 4. Tax (8% on non-grocery items, proportioned after discount)
-        discount_ratio = (net_subtotal / self.subtotal) if self.subtotal > 0 else 1.0
-        taxable_amount = sum(
-            item["price"] * item["quantity"]
-            for item in self.items.values()
-            if item["category"] != "grocery"
-        ) * discount_ratio
+        if self.subtotal > 0:
+            discount_ratio = net_subtotal / self.subtotal
+        else:
+            discount_ratio = 1.0
+
+        taxable_amount = 0
+        for item in self.items.values():
+            if item["category"] != "grocery":
+                taxable_amount += item["price"] * item["quantity"]
+        taxable_amount *= discount_ratio
         self.tax_amount = round(taxable_amount * self.TAX_RATE, 2)
 
         # 5. Shipping fee

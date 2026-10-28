@@ -53,8 +53,9 @@ class MeetingRoom:
             raise ValueError("Attendees must be positive")
         if attendees > self.capacity:
             raise ValueError(f"Attendees ({attendees}) exceeds room capacity ({self.capacity})")
-        if any(b["booking_id"] == booking_id for b in self.bookings):
-            raise ValueError(f"Duplicate booking ID: {booking_id}")
+        for b in self.bookings:
+            if b["booking_id"] == booking_id:
+                raise ValueError(f"Duplicate booking ID: {booking_id}")
 
         # Check for time conflicts with existing bookings
         for b in self.bookings:

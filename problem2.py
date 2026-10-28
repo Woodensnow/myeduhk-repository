@@ -60,8 +60,9 @@ class BankAccount:
             raise RuntimeError("Cannot deposit into a frozen account")
 
         self.balance += float(amount)
-        if self.balance >= 0 and self.status == "OVERDRAWN":
-            self.status = "ACTIVE"
+        if self.balance >= 0:
+            if self.status == "OVERDRAWN":
+                self.status = "ACTIVE"
 
         self.transaction_history.append({
             "type": "DEPOSIT",
@@ -150,7 +151,10 @@ class BankAccount:
 
     def unfreeze(self) -> None:
         """Unfreeze the account and restore appropriate active or overdrawn status."""
-        self.status = "OVERDRAWN" if self.balance < 0 else "ACTIVE"
+        if self.balance < 0:
+            self.status = "OVERDRAWN"
+        else:
+            self.status = "ACTIVE"
 
     def get_summary(self) -> Dict[str, Any]:
         """
@@ -164,3 +168,28 @@ class BankAccount:
             "overdraft_limit": self.overdraft_limit,
             "transaction_count": len(self.transaction_history)
         }
+
+import unittest
+class test_bankAccount(unittest.TestCase):
+    def setUp(self):
+        self.bank_account = BankAccount("Tim1001", "Tim", 1100.0)#先测试账户的建立，以及设置前置条件
+
+    def test_deposit(self):#测试存款
+        result = self.bank_account.deposit(100.0)
+
+        self.assertTrue(result)
+        self.assertEqual(self.bank_account.balance, 1200.0)
+        self.assertEqual(self.bank_account.status, "ACTIVE")
+        self.assertEqual(len(self.bank_account.transaction_history), 2)
+        self.assertEqual(
+            self.bank_account.transaction_history[-1]["type"],
+            "DEPOSIT"
+        )
+    def test_invalid_deposit(self):#存款失败余额不能改变
+         with self.assertRaises(ValueError):
+            self.bank_account.deposit(-10)
+
+         self.assertEqual(self.bank_account.balance, 1100.0)
+
+if __name__ == "__main__":
+    unittest.main()

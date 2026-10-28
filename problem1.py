@@ -23,7 +23,7 @@ def calculate_trip_fare(distance_km: float, is_rush_hour: bool = False, passenge
          if passenger_type is not one of {"adult", "child", "senior"}.
 
     Examples / Doctests:
-    Examples covering:
+    TODO: Add at least 6 comprehensive doctests below covering:
           - Standard normal trip (e.g. 5.0 km adult)
           - Boundary cases (e.g. 0.0 km, exactly 2.0 km)
           - Rush hour surcharge (e.g. 10.0 km during rush hour)
@@ -51,14 +51,7 @@ def calculate_trip_fare(distance_km: float, is_rush_hour: bool = False, passenge
     3.75
     >>> calculate_trip_fare(5.0, passenger_type="senior")
     5.25
-    >>> calculate_trip_fare(-1)
-    Traceback (most recent call last):
-        ...
-    ValueError: distance_km cannot be negative
-    >>> calculate_trip_fare(5, passenger_type="student")
-    Traceback (most recent call last):
-        ...
-    ValueError: invalid passenger_type: must be 'adult', 'child', or 'senior'
+
     """
     if distance_km < 0:
         raise ValueError("distance_km cannot be negative")

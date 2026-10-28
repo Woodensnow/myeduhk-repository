@@ -51,14 +51,17 @@ def clean_and_aggregate(
             raise ValueError(f"Record at index {i} is missing metric key: '{metric}'")
 
         # Apply optional filter
-        if filter_fn is not None and not filter_fn(record):
-            continue
+        if filter_fn is not None:
+            if not filter_fn(record):
+                continue
 
         raw_val = record[metric]
         if raw_val is None:
             continue  # Skip None / missing values
 
-        if not isinstance(raw_val, (int, float)) or isinstance(raw_val, bool):
+        if not isinstance(raw_val, (int, float)):
+            raise TypeError(f"Metric value '{raw_val}' in record {i} is not numeric")
+        if isinstance(raw_val, bool):
             raise TypeError(f"Metric value '{raw_val}' in record {i} is not numeric")
 
         group_key = str(record[group_by])
